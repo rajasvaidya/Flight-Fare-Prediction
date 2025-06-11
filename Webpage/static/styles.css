@@ -1,0 +1,34 @@
+body {
+    background-color: #e1f4f3;
+    text-align: center;
+}
+
+.navbar {
+    background-color: darkviolet;
+    text-align: center;
+}
+
+a {
+    color: #f1f9f9;
+}
+
+a:hover {
+    color: #f0f0f0;
+  }
+  
+input, select {
+    border-radius: 10px;
+    padding: 10px;
+    width: 100%;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+  body {
+    padding-top: 70px; /* Adjust based on navbar height */
+  }
+
+  .navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+  }

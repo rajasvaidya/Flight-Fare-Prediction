@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Fare Prediction</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-primary shadow-sm fixed-top">
+        <div class="container-fluid justify-content-center">
+            <a class="navbar-brand fw-bold text-uppercase mx-auto" href="/">Flight Fare Prediction</a>
+        </div>
+    </nav>
+
+    <br>
+
+    <div class="card mx-auto shadow p-4" style="max-width: 800px; border-radius: 20px;">
+        <form action="/predict" method="post" onsubmit="return validateRoute();">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Departure Date & Time</h5>
+                            <input type="datetime-local" name="Dep_Time" id="Dep_Time" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Arrival Date & Time</h5>
+                            <input type="datetime-local" name="Arrival_Time" id="Arrival_Time" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Source</h5>
+                            <select name="Source" id="source" required>
+                                <option value="" disabled selected>Select Source</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Chennai">Chennai</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Destination</h5>
+                            <select name="Destination" id="destination" required>
+                                <option value="" disabled selected>Select Destination</option>
+                                <option value="Bangalore">Bangalore</option>
+                                <option value="Cochin">Cochin</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="New Delhi">New Delhi</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Kolkata">Kolkata</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Stoppage</h5>
+                            <select name="stops" id="stops" required>
+                                <option value="" disabled selected>Select Stoppage</option>
+                                <option value="0">Non-Stop</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Airline</h5>
+                            <select name="airline" id="airline" required>
+                                <option value="" disabled selected>Select Airline</option>
+                                <option value="Jet Airways">Jet Airways</option>
+                                <option value="IndiGo">IndiGo</option>
+                                <option value="Air India">Air India</option>
+                                <option value="Multiple carriers">Multiple carriers</option>
+                                <option value="SpiceJet">SpiceJet</option>
+                                <option value="Vistara">Vistara</option>
+                                <option value="Air Asia">Air Asia</option>
+                                <option value="GoAir">GoAir</option>
+                                <option value="Multiple carriers Premium economy">Multiple carriers Premium economy</option>
+                                <option value="Jet Airways Business">Jet Airways Business</option>
+                                <option value="Vistara Premium economy">Vistara Premium economy</option>
+                                <option value="Trujet">Trujet</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <input type="submit" value="Predict Fare" class="btn btn-success btn-lg mt-4" style="border-radius: 10px;">
+        </form>
+    </div>
+    <h6 class="text-center mt-4">&copy; Developed by Rajas Vaidya and Vishwajkumar Rathod, COEP</h6>
+
+    <!-- Modal -->
+    <div class="modal" id="predictionModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Flight Price Prediction</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                    <div id="predictionDetails">
+                        <h5 class="text-primary">Flight Details</h5>
+                        <ul type="none">
+                            <li><strong>From:</strong> {{ Source }} → <strong>To:</strong> {{ Destination }}</li>
+                            <li><strong>Departure:</strong> {{ date_dep }}</li>
+                            <li><strong>Arrival:</strong> {{ date_arr }}</li>
+                            <li><strong>Stops:</strong> {{ total_stops }}</li>
+                            <li><strong>Airline:</strong> {{ airline }}</li>
+                        </ul>
+                        <h5 class="text-success">Predicted Fare: </h5><h4>₹{{ prediction_text }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <script>
+        {% if prediction_text %}
+        $(document).ready(function () {
+            $('#predictionModal').modal('show');
+        });
+        {% endif %}
+
+        const sourceSelect = document.getElementById("source");
+        const destSelect = document.getElementById("destination");
+        const cityGroups = [
+            ["Delhi", "New Delhi"]
+        ];
+
+        function getEquivalentCities(city) {
+            for (const group of cityGroups) {
+                if (group.includes(city)) return group;
+            }
+            return [city];
+        }
+
+        function updateDestinationOptions() {
+            const selectedSource = sourceSelect.value;
+            const equivalents = getEquivalentCities(selectedSource);
+            for (let option of destSelect.options) {
+                if (option.value === "") continue;
+                option.disabled = equivalents.includes(option.value);
+            }
+        }
+
+        function resetDestinationOptions() {
+            for (let option of destSelect.options) {
+                option.disabled = false;
+            }
+        }
+
+        sourceSelect.addEventListener("change", () => {
+            resetDestinationOptions();
+            updateDestinationOptions();
+        });
+
+        function validateRoute() {
+            const source = sourceSelect.value;
+            const dest = destSelect.value;
+            const stops = document.getElementById("stops").value;
+
+            const sourceGroup = getEquivalentCities(source);
+            if (source === dest || sourceGroup.includes(dest)) {
+                if (stops === "0") {
+                    document.getElementById("modalMessage").textContent = "Select another route with stoppage.";
+                    document.getElementById("predictionDetails").style.display = "none";
+                    $('#predictionModal').modal('show');
+                    return false;
+                }
+            }
+            return true;
+        };
+        document.addEventListener("DOMContentLoaded", function () {
+    const depInput = document.getElementById("Dep_Time");
+    const arrInput = document.getElementById("Arrival_Time");
+
+    // Format date to yyyy-MM-ddTHH:mm for input[type=datetime-local]
+    function toDateTimeLocal(dt) {
+      const pad = (n) => n.toString().padStart(2, "0");
+      return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    }
+
+    // Set minimum date to now
+    const now = new Date();
+    depInput.min = toDateTimeLocal(now);
+
+    // When user picks a Dep_Time, set Arrival_Time to Dep + 1 day by default
+    depInput.addEventListener("change", () => {
+      const depDate = new Date(depInput.value);
+      if (isNaN(depDate)) return;
+
+      const arrivalDate = new Date(depDate);
+      arrivalDate.setDate(arrivalDate.getDate() + 1); // +1 day
+
+      arrInput.value = toDateTimeLocal(arrivalDate);
+      arrInput.min = toDateTimeLocal(depDate); // Optional: prevent setting arrival before departure
+    });
+
+    // If user refreshes page with old input, enforce restrictions again
+    if (depInput.value) {
+      depInput.dispatchEvent(new Event("change"));
+    }
+  });
+    </script>
+</body>
+
+</html>
